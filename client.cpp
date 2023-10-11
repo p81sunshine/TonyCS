@@ -272,7 +272,7 @@ void client::sendmsg(){
     cout<<"please input IP:"<<endl;
     scanf("%s",newip);
     in_addr_t ip;
-    ip = inet_addr(newip);
+    ip = inet_addr(newip); // From string to in_addr_t
     cout<<"please input port"<<endl;
     scanf("%d",&port);
     Message msg;
