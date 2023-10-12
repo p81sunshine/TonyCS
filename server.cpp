@@ -33,7 +33,10 @@ struct Message {
 void *handle_client(void* client_socket){
     int clientSocket = *(int*)client_socket;
     char buffer[] = "Hello, I am server";
-    send(clientSocket, buffer, sizeof(buffer), 0);
+    Message bin;
+    for(int i=0;i<strlen(buffer);i++) bin.data[i] = buffer[i];
+    bin.type = CONNECT;
+    send(clientSocket, &bin, sizeof(bin), 0);
     struct Message msg;
     memset(&msg, 0, sizeof(msg));
     while (true) {
@@ -95,7 +98,7 @@ void *handle_client(void* client_socket){
         } else if (msg.type == GET_CLIENT_LIST) {
             printf("Type:GET_CLIENT_LIST\n");
             Message msg_ret;
-            char buffer[MAX_SIZE];
+            char buffer[MAX_SIZE-2];
             sprintf(buffer, "Client list: \n");
             for (int i = 0; i < clientIndex; i++) {
                 sprintf(buffer, "%s%d: address: %s:%d\n", buffer, i + 1, inet_ntoa(clientList[i].clientAddr.sin_addr), ntohs(clientList[i].clientAddr.sin_port)); // Question
@@ -110,21 +113,22 @@ void *handle_client(void* client_socket){
             printf("+----------------------------------------------------------+\n");
         } else if (msg.type == SEND_MSG) {
             printf("Type:SEND_MSG\n");
-            in_addr_t ip;
             in_port_t port;
             char content[MAX_SIZE - 50];
+            int number;
             memset(content, 0, sizeof(content));
-            sscanf(msg.data, "%u:%hu:%s", &ip, &port, content);
-            port = htons(port);
+            sscanf(msg.data, "%d:%s",  &number, content);
+            number--;
             struct in_addr addr;
-            addr.s_addr = ip;
+            addr.s_addr = clientList[number].clientAddr.sin_addr.s_addr;
+            port = clientList[number].clientAddr.sin_port;
             printf("Client send ip:%s, port:%u, content:%s\n", inet_ntoa(addr), port, content);
-            int targetSocket = -1;
-            for (int i = 0; i < clientIndex; i++) {
-                if (clientList[i].clientAddr.sin_addr.s_addr == ip && clientList[i].clientAddr.sin_port == port) {
-                    targetSocket = i;
-                    break;
-                }
+            int targetSocket;
+            if(clientIndex < number && number >= 0){
+                targetSocket = -1;
+            }
+            else{
+                targetSocket = number;
             }
             Message msg_ret;
             msg_ret.type = SEND_MSG;
@@ -135,7 +139,7 @@ void *handle_client(void* client_socket){
                 Message msg_send;
                 msg_send.type = REPOST; 
                 sprintf(msg_send.data, "%s", content);
-                sprintf(msg_ret.data, "%s", "Forwad Success!\n");
+                sprintf(msg_ret.data, "%s", "Forward Success!\n");
                 if (send(clientList[targetSocket].clientSocket, &msg_send, sizeof(msg_send), 0) < 0) {
                     printf("Fail to Forward message to client %d, error code: %d\n", clientList[targetSocket].clientSocket, errno);
                 } else {

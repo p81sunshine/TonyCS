@@ -106,20 +106,17 @@ void client::start(){
 
 
 void client::connecting(){
-    cout<<"connecting......"<<endl;
+    cout<<"[Info] connecting......"<<endl;
     //error detection
     if(client_sd!=-1){
-        cout<<"Error:reconnect"<<endl;
+        cout<<"[Error] reconnect"<<endl;
         return ;
     }
     //get socket
     client_sd = socket(AF_INET, SOCK_STREAM, 0);
     if (client_sd < 0) {
-        perror("Error: Create socket fail");
+        perror("[Error] Create socket fail");
         return;
-    }
-    else{
-        printf("socket success\n");
     }
     memset(&server_addr, 0, sizeof(server_addr));
     //data preparation
@@ -132,19 +129,29 @@ void client::connecting(){
         printf("[Error] Connect fail, error: %s\n", strerror(errno));
         return;
     } else {
-        printf("Connect success\n");
+        printf("[Info] Connect success\n");
     }
     //create pthread
     if (pthread_create(&thrd, NULL, helper_thread, &client_sd) != 0)
     {
         printf("[Error] Create thread fails!\n");
     }
+    Message msg;
+    long type = CONNECT;
+    //receive the message
+    if (msgrcv(msg_ID, &msg, MAX_SIZE, type, 0) < 0)
+    {
+        printf("[Error] getServerTime recv fail, error: %s\n", strerror(errno));
+        return;
+    }
+    cout<<msg.data<<endl;
+    return ;
 }
 
 void client::disconnecting(){
     //error detection
     if(client_sd==-1){
-        cout << "Error: No connect" << endl;
+        cout << "[Error]: No connect" << endl;
         return ;
     }
     //set type
@@ -203,7 +210,7 @@ void client::gettime(){
     //change the data into time
     time_t t;
     sscanf(msg.data, "%ld", &t);
-    printf("Time: %s\n", ctime(&t));
+    printf("Time: %s", ctime(&t));
     return;
 }
 
@@ -256,29 +263,25 @@ void client::getlist(){
         return;
     }
     //output the list
-    printf("Client list: %s\n", msg.data);
+    printf("%s", msg.data);
     return;
 }
 
 void client::sendmsg(){
     //check connenction state
     if(client_sd == -1){
-        cout<<"error: no connection"<<endl;
+        cout<<"[error] no connection"<<endl;
         return ;
     }
     //allow user input ip and port
     char newip[MAX_SIZE];
-    int port;
-    cout<<"please input IP:"<<endl;
-    scanf("%s",newip);
-    in_addr_t ip;
-    ip = inet_addr(newip); // From string to in_addr_t
-    cout<<"please input port"<<endl;
-    scanf("%d",&port);
     Message msg;
     //set type
     msg.type = SEND_MSG;
-    sprintf(msg.data, "%u:%d:", ip, port);
+    int number;
+    cout<<"please input number:"<<endl;
+    scanf("%d",&number);
+    sprintf(msg.data, "%d:",number);
     char content[MAX_SIZE - 50];
     //read in the content
     cout<<"please input content"<<endl;
@@ -298,7 +301,7 @@ void client::sendmsg(){
         return;
     }
 
-    printf("Server Response: %s\n", msg.data);
+    printf("Server Response: %s", msg.data);
     return;    
 }
 
