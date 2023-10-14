@@ -13,16 +13,17 @@
 #include <netinet/in.h>
 #include<unistd.h>
 #include<errno.h>
-
+#include <unistd.h>
 #include<pthread.h>
 const int MAX_SIZE = 256;
 enum type {CONNECT = 1, DISCONNECT, GET_TIME, GET_NAME, GET_CLIENT_LIST, SEND_MSG, REPOST};
-void *helper_thread(void *arg);
-
 struct Message {
     long type;
     char data[MAX_SIZE - 2];
 };
+void *helper_thread(void *arg);
+
+
 using namespace std;
 int msg_ID;
 
@@ -180,6 +181,10 @@ void *helper_thread(void *arg)
         if (recv(sockfd, &msg, sizeof(msg), 0) < 0){
             printf("[Error] helper recv fail, error: %s\n", strerror(errno));
         }
+        if (msg.type == REPOST){
+            printf("Receive repost: %s\n", msg.data);
+            continue;
+        }
         //send to the main thread
         msgsnd(msg_ID, &msg, MAX_SIZE, 0);
     }
@@ -284,10 +289,9 @@ void client::sendmsg(){
     sprintf(msg.data, "%d:",number);
     char content[MAX_SIZE - 50];
     //read in the content
-    cout<<"please input content"<<endl;
+    cout<<"please input content:"<<endl;
     scanf("%s", content);
     sprintf(msg.data + strlen(msg.data), "%s", content);
-    printf("%s\n", msg.data);
     if (send(client_sd, &msg, sizeof(msg), 0) < 0)
     {
         printf("[Error] sendToOtherClient send fail, error: %s\n", strerror(errno));
@@ -302,6 +306,7 @@ void client::sendmsg(){
     }
 
     printf("Server Response: %s", msg.data);
+    sleep(0.1);
     return;    
 }
 
