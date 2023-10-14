@@ -23,7 +23,7 @@ int clientIndex = 0;
 /* Set datapack */
 enum msgType {CONNECT = 1, DISCONNECT, GET_TIME, GET_NAME, GET_CLIENT_LIST, SEND_MSG, REPOST};
 
-const int MAX_SIZE = 256;
+const int MAX_SIZE = 8 * 256;
 
 struct Message {
     long type;
@@ -101,7 +101,7 @@ void *handle_client(void* client_socket){
             char buffer[MAX_SIZE-2];
             sprintf(buffer, "Client list: \n");
             for (int i = 0; i < clientIndex; i++) {
-                sprintf(buffer, "%s%d: address: %s:%d\n", buffer, i + 1, inet_ntoa(clientList[i].clientAddr.sin_addr), ntohs(clientList[i].clientAddr.sin_port)); // Question
+                sprintf(buffer, "%s%d: address: %s:%d\n","Client",i + 1, inet_ntoa(clientList[i].clientAddr.sin_addr), ntohs(clientList[i].clientAddr.sin_port)); // Question
             }
             sprintf(msg_ret.data, "%s", buffer); // Copy buffer to msg_ret.data
             msg_ret.type = GET_CLIENT_LIST;
