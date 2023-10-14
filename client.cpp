@@ -188,7 +188,7 @@ void *helper_thread(void *arg)
             printf("[Error] helper recv fail, error: %s\n", strerror(errno));
         }
         if (msg.type == REPOST){
-            printf("Receive repost: %s\n", msg.data);
+            printf("\nReceive repost: %s\n", msg.data);
             continue;
         }
         //send to the main thread
