@@ -102,8 +102,8 @@ void client::start(){
             cout<<"error input"<<endl;
             break;
         }
-}
     }
+}
 
 
 void client::connecting(){
@@ -121,9 +121,15 @@ void client::connecting(){
     }
     memset(&server_addr, 0, sizeof(server_addr));
     //data preparation
+    int port;
+    char ip[20];
+    cout<<"Please input ip:\n";
+    cin>>ip;
+    cout<<"Please input port:\n";
+    cin>>port;
     server_addr.sin_family = AF_INET;
-    server_addr.sin_port = htons(1733);
-    server_addr.sin_addr.s_addr = inet_addr("127.0.0.1");
+    server_addr.sin_port = htons(port);
+    server_addr.sin_addr.s_addr = inet_addr(ip);
     //connection
     int mark = connect(client_sd, (sockaddr *)&server_addr, sizeof(server_addr));
     if(mark < 0){
