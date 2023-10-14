@@ -23,7 +23,7 @@ int clientIndex = 0;
 /* Set datapack */
 enum msgType {CONNECT = 1, DISCONNECT, GET_TIME, GET_NAME, GET_CLIENT_LIST, SEND_MSG, REPOST};
 
-const int MAX_SIZE = 8 * 256;
+const int MAX_SIZE = 256;
 
 struct Message {
     long type;
