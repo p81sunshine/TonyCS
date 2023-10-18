@@ -63,6 +63,7 @@ client::~client(){
 void client::start(){
     cout << "+----------------------------------+\n";
     cout << "|   Welcome to use this client!    |\n";
+
     while(1){
         cout << "+----------------------------------+\n";
         cout << "| 1 : connect to server            |\n";
@@ -84,7 +85,10 @@ void client::start(){
             disconnecting();
             break;
         case 3:
-            gettime();
+            for (int i = 0; i < 100; i++) {
+                gettime();
+                sleep(1);
+            }
             break;
         case 4:
             getname();
